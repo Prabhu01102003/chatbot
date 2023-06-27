@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Buying Suggestion Bot</title>
+     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f1f1f1;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #chat-container {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            height: 300px;
+            overflow-y: scroll;
+            padding: 10px;
+        }
+
+        #user-input-form {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        #user-input {
+            flex-grow: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+        }
+
+        #user-input:focus {
+            outline: none;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Welcome to the Phone Buying Suggestion Bot!</h1>
+        <div id="chat-container">
+            <div id="chat-log"></div>
+        </div>
+        <form id="user-input-form">
+            <input type="text" id="user-input" placeholder="Type your message here..." autocomplete="off" />
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const chatLog = document.getElementById('chat-log');
+        const userInputForm = document.getElementById('user-input-form');
+        const userInput = document.getElementById('user-input');
+
+        const greetings = ["Hi!", "Hello!", "Hey there!"];
+        const goodbyes = ["Goodbye!", "Bye!", "Thank you!"];
+
+         const brands = {
+    "Apple": {
+        "Specifications": "Apple iPhones are known for their sleek design, smooth performance, and high-quality cameras.",
+        "Budget Range": "₹30,000 - ₹1,50,000",
+        "Features": "Apple iPhones offer a seamless user experience, excellent cameras, and access to the iOS ecosystem.",
+        "Budget Mobiles": {
+            "₹30,000 - ₹45,000": [{"Model": "iPhone SE", "Features": "\nCamera-12MP\nProcessor-A13 Bionic\nStorage-64GB\nBattery-1821mAh"}],
+            "₹45,000 - ₹55,000": [{"Model": "iPhone 11", "Features": "\nCamera-12MP\nProcessor-A13 Bionic\nStorage-64GB\nBattery-3110 mAh"}],
+            "₹55,000 - ₹65,000": [{"Model": "iPhone 13", "Features": "\nCamera-12MP\nProcessor-A13 Bionic\nStorage-128GB\nBattery-3110 mAh"}],
+            "₹80,000 - ₹1,50,000": [{"Model": "iPhone 13 Pro", "Features": "\nCamera-13MP\nProcessor-A13 Bionic\nStorage-256GB\nBattery-3110 mAh"}]
+        }
+    },
+    "Samsung": {
+        "Specifications": "Samsung phones are known for their vibrant displays, powerful performance, and feature-rich cameras.",
+        "Budget Range": "₹10,000 - ₹1,50,000",
+        "Features": "Samsung phones offer a wide range of options for every budget, excellent cameras, and a customizable user interface.",
+        "Budget Mobiles": {
+            "₹10,000 - ₹20,000": [{"Model": "Galaxy M02s", "Features": "\nCamera-13MP\nProcessorSnapdragon 450\nStorage-32GB\nBattery-5000 mAh"}],
+            "₹20,000 - ₹40,000": [{"Model": "Galaxy F41", "Features": "\nCamera-64MP\nProcessor-Exynos 9611\nStorage-128GB\nBattery-6000 mAh"}],
+            "₹40,000 - ₹1,50,000": [{"Model": "Galaxy S21", "Features": "\nCamera-64MP\nProcessor-Exynos 2100 / Snapdragon 888\nStorage-256GB\nBattery-4000 mAh"}]
+        }
+    },
+    "Google": {
+        "Specifications": "Google Pixel phones are known for their exceptional camera quality, clean software experience, and timely software updates.",
+        "Budget Range": "₹30,000 - ₹1,00,000",
+        "Features": "Google Pixel phones offer one of the best camera experiences, pure Android software, and seamless integration with Google services.",
+        "Budget Mobiles": {
+            "₹30,000 - ₹50,000": [{"Model": "Pixel 4a", "Features": "\nCamera-12.2 MP\nProcessor-Snapdragon 730G\nStorage-128GB\nBattery-3140 mAh"}],
+            "₹50,000 - ₹80,000": [{"Model": "Pixel 5", "Features": "\nCamera-12.2 MP\nProcessor-Snapdragon 765G\nStorage-128GB\nBattery-4080 mAh"}],
+            "₹80,000 - ₹1,00,000": [{"Model": "Pixel 6", "Features": "\nCamera-13MP\nProcessor-Snapdragon 888G\nStorage-256GB\nBattery-5080 mAh"}]
+        }
+    },
+    "OnePlus": {
+        "Specifications": "OnePlus phones are known for their fast and smooth performance, OxygenOS user interface, and high-quality displays.",
+        "Budget Range": "₹20,000 - ₹1,00,000",
+        "Features": "OnePlus phones offer flagship-level specifications, a clean user interface, and fast charging technology.",
+        "Budget Mobiles": {
+            "₹20,000 - ₹40,000": [{"Model": "OnePlus Nord CE", "Features": "\nCamera-32MP\nProcessor-Snapdragon 750G\nStorage-128GB\nBattery-4000 mAh"}],
+            "₹40,000 - ₹60,000": [{"Model": "OnePlus 9", "Features": "\nCamera-48MP\nProcessor-Snapdragon 850G\nStorage-128GB\nBattery-4500 mAh"}],
+            "₹60,000 - ₹1,00,000": [{"Model": "OnePlus 9T", "Features": "\nCamera-64MP\nProcessor-Snapdragon 8Gen\nStorage-256GB\nBattery-5000 mAh"}]
+        }
+    },
+    "Xiaomi": {
+        "Specifications": "Xiaomi phones offer excellent value for money, feature-rich specifications, and MIUI user interface.",
+        "Budget Range": "₹5,000 - ₹50,000",
+        "Features": "Xiaomi phones offer a wide range of options for every budget, good camera performance, and extensive customization options.",
+        "Budget Mobiles": {
+            "₹5,000 - ₹10,000": [{"Model": "Redmi 9A", "Features": "\nCamera-32MP\nProcessor-MediaTek Helio G25\nStorage-64GB\nBattery-5000 mAh"}],
+            "₹10,000 - ₹20,000": [{"Model": "Redmi Note 10", "Features": "\nCamera-48MP\nProcessor-Snapdragon 678\nStorage-128GB\nBattery-6000 mAh"}],
+            "₹20,000 - ₹50,000": [{"Model": "Mi 11X", "Features": "\nCamera-64MP\nProcessor-Snapdragon 870\nStorage-256GB\nBattery-6000 mAh"}]
+        }
+    }
+};
+
+        
+        const username = "User"; // Default username
+        
+        let userSpecs = {};
+        let questionIndex = 0;
+
+        function scrollToBottom() {
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        function addBotMessage(message) {
+            const botMessage = document.createElement('div');
+            botMessage.classList.add('bot-message');
+            const typingAnimation = document.createElement('span');
+            typingAnimation.classList.add('typing-animation');
+            typingAnimation.textContent = "PhoneBot is typing..."; // Typing animation message
+            botMessage.appendChild(typingAnimation);
+            chatLog.appendChild(botMessage);
+            scrollToBottom();
+
+            setTimeout(function () {
+                botMessage.removeChild(typingAnimation);
+                const botResponse = document.createElement('span');
+                botResponse.innerHTML = "<b>PhoneBot:</b> " + message;
+                botMessage.appendChild(botResponse);
+                scrollToBottom();
+            }, 1000); // 1-second delay for the typing animation
+        }
+
+        function addUserMessage(message) {
+   	 const userMessage = document.createElement('div');
+    	userMessage.classList.add('user-message');
+    	userMessage.innerHTML = "<b><span style='color: red;'>User:</span></b> " + message;
+   	 chatLog.appendChild(userMessage);
+   	 scrollToBottom();
+        }
+
+        function processUserInput(userInput) {
+            if (greetings.some(greeting => userInput.includes(greeting))) {
+                addBotMessage(getRandomChoice(greetings));
+                return;
+            }
+
+                        if (goodbyes.some(goodbye => userInput.includes(goodbye))) {
+                addBotMessage(getRandomChoice(goodbyes));
+                return;
+            }
+
+            if (questionIndex === 0) {
+                addBotMessage("PhoneBot: Sure! What is your budget for the smartphone?");
+                questionIndex += 1;
+            } else if (questionIndex === 1) {
+                userSpecs.budget = userInput;
+                addBotMessage("PhoneBot: What display size do you prefer?");
+                questionIndex += 1;
+            } else if (questionIndex === 2) {
+                userSpecs.displaySize = userInput;
+                addBotMessage("PhoneBot: What camera quality do you prefer?");
+                questionIndex += 1;
+            } else if (questionIndex === 3) {
+                userSpecs.cameraQuality = userInput;
+                addBotMessage("PhoneBot: What battery life are you looking for?");
+                questionIndex += 1;
+            } else if (questionIndex === 4) {
+                userSpecs.batteryLife = userInput;
+                addBotMessage("PhoneBot: What processor do you prefer?");
+                questionIndex += 1;
+            } else if (questionIndex === 5) {
+                userSpecs.processor = userInput;
+                addBotMessage("PhoneBot: What storage capacity do you prefer?");
+                questionIndex += 1;
+            } else if (questionIndex === 6) {
+                userSpecs.storageCapacity = userInput;
+                addBotMessage("PhoneBot: Thank you for providing the information. Based on your preferences, I recommend considering the following phones:");
+
+                const suggestions = [];
+                for (const brand in brands) {
+                    const brandInfo = brands[brand];
+                    const budgetMobiles = brandInfo["Budget Mobiles"];
+
+                    for (const budgetRange in budgetMobiles) {
+  if (budgetRange === userSpecs.budget) {
+    const mobiles = budgetMobiles[budgetRange];
+    for (const mobile of mobiles) {
+      suggestions.push(`- ${mobile.Model}\n` +
+                      `  - Specifications: ${brandInfo.Specifications}\n` +
+                      `  - Budget Range: ${budgetRange}\n` +
+                      `  - Features: ${brandInfo.Features}\n` +
+                      `  - Mobile Features: ${mobile.Features}\n`);
+    }
+  }
+}
+
+
+                }
+                addBotMessage(suggestions.join(''));
+                questionIndex += 1;
+            } else {
+                addBotMessage("PhoneBot: I'm sorry, I couldn't understand your request. Let's start again.");
+                questionIndex = 0;
+            }
+        }
+
+        function getRandomChoice(arr) {
+            const randomIndex = Math.floor(Math.random() * arr.length);
+            return arr[randomIndex];
+        }
+
+        userInputForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = userInput.value.trim();
+            if (message !== '') {
+                addUserMessage(message);
+                processUserInput(message);
+                userInput.value = '';
+            }
+        });
+
+        addBotMessage(getRandomChoice(greetings));
+        addBotMessage("How can I assist you today, " + username + "?"); // Include username in the welcome message
+    </script>
+</body>
+</html>
